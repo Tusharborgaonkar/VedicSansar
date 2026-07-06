@@ -52,8 +52,9 @@ export async function middleware(request){
         
     } catch (error) {
         console.log(error);
-        return NextResponse.redirect(new URL(WEBSITE_LOGIN, request.nextUrl));
-        
+        const response = NextResponse.redirect(new URL(WEBSITE_LOGIN, request.nextUrl));
+        response.cookies.delete('access_token');
+        return response;
     }
 }
 

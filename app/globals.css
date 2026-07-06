@@ -116,32 +116,96 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
   body {
     @apply bg-background text-foreground;
   }
 }
 
-.slick-dots{
-  bottom:15px !important;
-  color:rgb(168, 79, 16) !important;
+:root {
+  --floating-action-size: clamp(2.75rem, 3vw, 3rem);
+  --floating-action-gap: clamp(0.75rem, 3vw, 1.5rem);
+}
+
+.responsive-floating-action,
+.tsqd-parent-container .tsqd-open-btn-container {
+  position: fixed !important;
+  right: max(var(--floating-action-gap), env(safe-area-inset-right)) !important;
+  bottom: max(var(--floating-action-gap), env(safe-area-inset-bottom)) !important;
+  left: auto !important;
+  top: auto !important;
+  width: var(--floating-action-size) !important;
+  height: var(--floating-action-size) !important;
+  min-width: var(--floating-action-size) !important;
+  min-height: var(--floating-action-size) !important;
+  max-width: calc(100vw - (var(--floating-action-gap) * 2)) !important;
+  max-height: calc(100dvh - (var(--floating-action-gap) * 2)) !important;
+  aspect-ratio: 1 / 1;
+  border-radius: 9999px !important;
+  overflow: visible !important;
+  z-index: 60;
+}
+
+.responsive-floating-action > *,
+.tsqd-parent-container .tsqd-open-btn-container > *,
+.tsqd-parent-container .tsqd-open-btn {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: inherit !important;
+}
+
+.responsive-floating-action img,
+.responsive-floating-action svg,
+.tsqd-parent-container .tsqd-open-btn-container svg {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+@media (max-width: 480px) {
+  :root {
+    --floating-action-gap: clamp(0.875rem, 4vw, 1.25rem);
+  }
+}
+
+.slick-dots {
+  bottom: 15px !important;
+  color: rgb(168, 79, 16) !important;
 }
 
 img {
-  user-select: none;      /* Prevent text selection */
-  -webkit-user-drag: none; /* Disable image dragging in Safari/Chrome */
+  user-select: none;
+  -webkit-user-drag: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
 }
 
-/* Custom text selection color */
 ::selection {
-  background-color: #92400e; /* Tailwind amber-800 */
-  color: white; /* optional — improves readability */
+  background-color: #92400e;
+  color: white;
 }
 
-/* For Firefox */
 ::-moz-selection {
   background-color: #92400e;
   color: white;
+}
+
+.Toastify__toast-theme--light {
+  color: #000 !important;
+}
+.Toastify__toast-theme--light * {
+  color: #000 !important;
+}
+
+.Toastify__toast-theme--colored {
+  color: #fff !important;
+}
+.Toastify__toast-theme--colored * {
+  color: #fff !important;
 }

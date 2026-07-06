@@ -1,8 +1,10 @@
 'use client'
 import ButtonLoading from '@/components/Application/ButtonLoading'
 import { Button } from '@/components/ui/button'
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
+import { Form, FormControl, FormField, FormItem, FormMessage, FormLabel } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Label } from '@/components/ui/label'
 import WebsiteBreadcrumb from '@/components/Website/WebsiteBreadcrumb'
 import useFetch from '@/hooks/useFetch'
 import { showToast } from '@/lib/showToast'
@@ -19,7 +21,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { MdDiscount } from "react-icons/md";
 import { RiDiscountPercentFill } from "react-icons/ri";
 import { MdDelete } from "react-icons/md";
-import { FaShippingFast } from "react-icons/fa";
+import { FaShippingFast, FaCreditCard, FaMoneyBillWave } from "react-icons/fa";
 import { Textarea } from '@/components/ui/textarea'
 import z from 'zod'
 import Script from 'next/script'
@@ -143,7 +145,7 @@ const Checkout = () => {
     
   }).extend({
     userId: z.string().optional(),
-    
+    paymentMethod: z.enum(['online', 'cod']),
   })
 
   const orderForm = useForm({
@@ -158,6 +160,7 @@ const Checkout = () => {
       pincode:'',
       landmark:'',
       ordernote:'',
+      paymentMethod: 'online',
       userId: authStore?.auth?._id,
     }
   });
@@ -175,13 +178,14 @@ const Checkout = () => {
       const {data : orderIdData} = await axios.post('/api/payment/get-order-id', {amount});
 
       if(!orderIdData.success){
-        throw new Error(orderIdData.message); 
+        throw new Error(orderIdData.message || 'Failed to generate order ID'); 
       }
 
       return {success: true, order_id: orderIdData.data}
     } catch(error)
     {
-      return {success: false, message: error.message}
+      const errorMsg = error.response?.data?.message || error.response?.data?.error?.error?.description || error.message;
+      return {success: false, message: errorMsg}
     }
   }
 
@@ -189,6 +193,39 @@ const Checkout = () => {
 
     setPlacingOrder(true);
     try {
+      const products = verifiedCartData.map((cartItem)=>(
+        {
+           productId : cartItem.productId,
+           variantId: cartItem.variantId,
+           name: cartItem.name,
+           qty: cartItem.qty,
+           mrp: cartItem.mrp,
+           sellingPrice: cartItem.sellingPrice,
+        }
+      ))
+
+      if (formData.paymentMethod === 'cod') {
+        setSavingOrder(true);
+        const {data : paymentResponseData} = await axios.post('/api/payment/save-order', {
+            ...formData,
+            products : products,
+            subtotal : subtotal,
+            discount: discount,
+            couponDiscountAmount: couponDiscountAmount,
+            totalAmount:totalAmount
+        })
+
+        if(paymentResponseData.success){
+          showToast('success', paymentResponseData.message);
+          dispatch(clearCart())
+          orderForm.reset();
+          router.push(WEBSITE_ORDER_DETAILS(paymentResponseData.data.order_id))
+        } else {
+          showToast('error', paymentResponseData.message);
+          setSavingOrder(false);
+        }
+        return;
+      }
 
       const generateOrderId = await getOrderId(totalAmount);
 
@@ -208,16 +245,6 @@ const Checkout = () => {
         "order_id": order_id, 
         "handler": async function (response){
            setSavingOrder(true);
-            const products = verifiedCartData.map((cartItem)=>(
-              {
-                 productId : cartItem.productId,
-                 variantId: cartItem.variantId,
-                 name: cartItem.name,
-                 qty: cartItem.qty,
-                 mrp: cartItem.mrp,
-                 sellingPrice: cartItem.sellingPrice,
-              }
-            ))
 
             const {data : paymentResponseData} = await axios.post('/api/payment/save-order', {
                 ...formData,
@@ -235,7 +262,6 @@ const Checkout = () => {
 
               orderForm.reset();
               router.push(WEBSITE_ORDER_DETAILS(response.razorpay_order_id))
-              setSavingOrder(false);
             }
             else{
               showToast('error', paymentResponseData.message);
@@ -272,13 +298,11 @@ const Checkout = () => {
     <div>
 
       {savingOrder && 
-        <div className='h-screen w-screen fixed top-0 left-0 z-50 bg-black/20'>
-
-          <div className='h-screen flex items-center justify-center '>
+        <div className='h-screen w-screen fixed top-0 left-0 z-50 bg-black/60 flex items-center justify-center'>
+          <div className='bg-white p-6 rounded-lg flex flex-col items-center justify-center shadow-lg dark:bg-gray-800'>
                 <Image src={loading.src} height={80} width={80} alt='loading'/>
-                <h4 className='text-amber-900 font-semibold'>Order Confirming...</h4>
+                <h4 className='text-amber-900 font-semibold mt-4 text-center dark:text-amber-500'>Order Confirming...</h4>
           </div>
-          
         </div>
       }
       <WebsiteBreadcrumb props={breadCrumb} />
@@ -480,6 +504,56 @@ const Checkout = () => {
 
                                         </FormField>
                                       </div>
+
+                                      <div className='mb-6 col-span-2 mt-6'>
+                                        <FormField
+                                          control={orderForm.control}
+                                          name='paymentMethod'
+                                          render={({ field }) => (
+                                            <FormItem className="space-y-4">
+                                              <Label className="font-bold text-xl text-gray-800 dark:text-gray-200 tracking-tight">Payment Method</Label>
+                                              <FormControl>
+                                                <RadioGroup
+                                                  onValueChange={field.onChange}
+                                                  defaultValue={field.value}
+                                                  className="grid grid-cols-1 md:grid-cols-2 gap-5"
+                                                >
+                                                  <FormItem className="space-y-0">
+                                                    <FormControl>
+                                                      <RadioGroupItem value="online" className="peer sr-only" />
+                                                    </FormControl>
+                                                    <FormLabel
+                                                      className="flex flex-col items-center justify-center rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-6 hover:bg-gray-50 dark:hover:bg-gray-800 peer-data-[state=checked]:border-amber-700 peer-data-[state=checked]:bg-amber-50 dark:peer-data-[state=checked]:bg-amber-900/30 dark:peer-data-[state=checked]:border-amber-500 cursor-pointer transition-all duration-300 ease-in-out shadow-sm hover:shadow-md hover:-translate-y-1"
+                                                    >
+                                                      <div className="bg-amber-100 dark:bg-amber-900/50 p-4 rounded-full mb-4">
+                                                        <FaCreditCard className="h-8 w-8 text-amber-700 dark:text-amber-400" />
+                                                      </div>
+                                                      <span className="text-lg font-bold text-gray-900 dark:text-gray-100">Pay Online</span>
+                                                      <span className="text-sm text-gray-500 dark:text-gray-400 mt-2 text-center font-medium">Credit/Debit, UPI, & Wallets</span>
+                                                    </FormLabel>
+                                                  </FormItem>
+                                                  
+                                                  <FormItem className="space-y-0">
+                                                    <FormControl>
+                                                      <RadioGroupItem value="cod" className="peer sr-only" />
+                                                    </FormControl>
+                                                    <FormLabel
+                                                      className="flex flex-col items-center justify-center rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-6 hover:bg-gray-50 dark:hover:bg-gray-800 peer-data-[state=checked]:border-amber-700 peer-data-[state=checked]:bg-amber-50 dark:peer-data-[state=checked]:bg-amber-900/30 dark:peer-data-[state=checked]:border-amber-500 cursor-pointer transition-all duration-300 ease-in-out shadow-sm hover:shadow-md hover:-translate-y-1"
+                                                    >
+                                                      <div className="bg-amber-100 dark:bg-amber-900/50 p-4 rounded-full mb-4">
+                                                        <FaMoneyBillWave className="h-8 w-8 text-amber-700 dark:text-amber-400" />
+                                                      </div>
+                                                      <span className="text-lg font-bold text-gray-900 dark:text-gray-100">Cash on Delivery</span>
+                                                      <span className="text-sm text-gray-500 dark:text-gray-400 mt-2 text-center font-medium">Pay via cash when order arrives</span>
+                                                    </FormLabel>
+                                                  </FormItem>
+                                                </RadioGroup>
+                                              </FormControl>
+                                              <FormMessage />
+                                            </FormItem>
+                                          )}
+                                        />
+                                      </div>
                                           
                                       <div className='mb-3'>
                                         <ButtonLoading type="submit" text="Place Order" loading={placingOrder} className="bg-black rounded-full px-5 hover:bg-gray-900 cursor-pointer" />
@@ -491,7 +565,7 @@ const Checkout = () => {
           </div>
 
             <div className='lg:w-[40%] w-full'>
-                <div className='rounded bg-gray-50 p-5 sticky top-5'>
+                <div className='rounded bg-gray-50 dark:bg-gray-800 dark:text-white p-5 sticky top-5'>
                   <h4 className='text-lg font-semibold mb-5'>Order Summary</h4>
 
                   <div>
@@ -602,7 +676,7 @@ const Checkout = () => {
 
                             :
 
-                            <div className='flex justify-between py-1 px-5 rounded-lg bg-gray-200'>
+                            <div className='flex justify-between py-1 px-5 rounded-lg bg-gray-200 dark:bg-gray-700 dark:text-white'>
 
                               <div>
                                 <span className='text-xs flex items-center gap-2 '>Coupon: <MdDiscount size={18} /></span>

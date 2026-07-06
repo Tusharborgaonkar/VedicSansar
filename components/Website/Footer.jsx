@@ -19,13 +19,8 @@ const Footer = () => {
             src={logoDark.src}
             height={logoDark.height}
             width={logoDark.width}
-            className="block h-[180px] dark:hidden max-w-[250px] w-auto"
+            className="block dark:hidden w-[140px] sm:w-[180px] h-auto"
             alt="logo Light"
-            style={{
-              marginTop: "-5rem",
-              marginLeft: "-3rem",
-              marginBottom: "-4rem",
-            }}
           />
 
           <p className="text-white text-sm  mt-4">

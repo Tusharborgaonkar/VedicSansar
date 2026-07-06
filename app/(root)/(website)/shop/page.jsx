@@ -34,7 +34,7 @@ const Shop = () => {
     const {data : getProduct} = await axios.get(`/api/shop?page=${pageParam}&limit=${limit}&sort=${sorting}&${searchParams}`);
 
     if(!getProduct.success){
-      return;
+      throw new Error(getProduct.message || "Failed to fetch products");
     }
 
     return getProduct.data;
@@ -45,7 +45,7 @@ const Shop = () => {
     queryFn: async ({pageParam})=>await fetchProduct(pageParam),
     initialPageParam:0,
     getNextPageParam: (lastPage)=>{
-      return lastPage.nextPage
+      return lastPage?.nextPage
     }
   });
 

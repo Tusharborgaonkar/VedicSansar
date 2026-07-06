@@ -57,7 +57,7 @@ const MediaPage = () => {
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => {
       const nextPage = pages.length
-      return lastPage.hasMore ? nextPage : undefined
+      return lastPage?.hasMore ? nextPage : undefined
     },
   });
 

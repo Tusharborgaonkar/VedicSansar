@@ -10,7 +10,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 const queryClient = new QueryClient();
 const GlobalStoreProvider = ({children}) => {
   return (
-    <div>
+    <div className="min-w-0 overflow-x-clip">
       <QueryClientProvider client={queryClient}>
         <Provider store={store} >
           <PersistGate persistor={persistor} loading={<Loading />}>
@@ -18,7 +18,11 @@ const GlobalStoreProvider = ({children}) => {
           </PersistGate>
         </Provider>
         <Suspense fallback={null}>
-          <ReactQueryDevtools initialIsOpen={false} />
+          <ReactQueryDevtools
+            initialIsOpen={false}
+            buttonPosition="bottom-right"
+            position="bottom"
+          />
         </Suspense>
       </QueryClientProvider>
     </div>

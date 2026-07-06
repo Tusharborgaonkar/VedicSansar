@@ -74,13 +74,18 @@ const orderSchema = new mongoose.Schema({
         enum: orderStatus,
         default: 'pending'
     },
+    paymentMethod: {
+        type: String,
+        enum: ['online', 'cod'],
+        default: 'online'
+    },
     payment_id : {
         type : String,
-        required: true,
+        required: false,
     },
     order_id : {
         type : String,
-        required: true,
+        required: false,
     },
     deletedAt : {
         type: Date,

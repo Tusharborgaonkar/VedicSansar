@@ -19,7 +19,7 @@ const FeaturedProduct = async() => {
   return (
     //  Featured Products section
     
-    <section className='lg:px-32 px-4 sm:py-10'>
+    <section className='lg:px-32 px-4 py-5 sm:py-10'>
         <div className='flex justify-between items-center mb-5'>
                 <h2 className='sm:text-4xl text-2xl font-semibold text-amber-800'>Featured Products</h2>
                 <Link href={WEBSITE_SHOP} className='flex gap-2 items-center underline underline-offset-4 hover:text-primary'>View All

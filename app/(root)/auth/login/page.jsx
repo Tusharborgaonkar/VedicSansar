@@ -38,7 +38,7 @@ const LoginPage = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [otpVerificationLoading, setOtpVerificationLoading] = useState(false);
-  // const [isTypePassword, setIsTypePassword] = useState(true);
+  const [isTypePassword, setIsTypePassword] = useState(true);
   const [otpEmail, setOtpEmail] = useState()
   const formSchema = zSchema.pick({
     email: true
@@ -160,24 +160,24 @@ const LoginPage = () => {
                                 control={form.control}
                                 name="password"
                                 render={({ field }) => (
-                                  <FormItem className='relative'>
+                                  <FormItem>
                                     <FormLabel>Password</FormLabel>
-                                    <FormControl>
-                                      <Input 
-                                        type="password"
-                                        placeholder="Enter your password" {...field}  
-                                      />
-                                    </FormControl>
-
-                                      {/* <button className='absolute top-1/2 right-2 cursor-pointer' type='submit' onClick={()=> setIsTypePassword(!isTypePassword)}>
-                                            {isTypePassword ? 
-                                              
-                                              <FaRegEyeSlash />
-                                              :
-
-                                              <FaRegEye />
-                                          }
-                                      </button> */}
+                                    <div className='relative'>
+                                      <FormControl>
+                                        <Input 
+                                          type={isTypePassword ? "password" : "text"}
+                                          placeholder="Enter your password" {...field}  
+                                          className="pr-10"
+                                        />
+                                      </FormControl>
+                                      <button 
+                                        className='absolute top-1/2 -translate-y-1/2 right-3 cursor-pointer text-gray-500 hover:text-gray-800' 
+                                        type='button' 
+                                        onClick={()=> setIsTypePassword(!isTypePassword)}
+                                      >
+                                        {isTypePassword ? <FaRegEyeSlash /> : <FaRegEye />}
+                                      </button>
+                                    </div>
                                     <FormMessage />
                                   </FormItem>
                                 )}

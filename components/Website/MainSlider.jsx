@@ -14,8 +14,8 @@ import { IoChevronBackOutline } from "react-icons/io5";
 const ArrowNext = (props)=>{
     const {onClick} = props;
     return(
-        <button onClick={onClick} type='button' className='w-14 h-14 flex justify-center items-center rounded-full absolute z-10 top-1/2 -translate-y-1/2  bg-amber-700 text-white right-10'>
-            <IoChevronForward  size={25} />
+        <button onClick={onClick} type='button' className='w-8 h-8 sm:w-14 sm:h-14 flex justify-center items-center rounded-full absolute z-10 top-1/2 -translate-y-1/2 bg-amber-700 text-white right-2 sm:right-10'>
+            <IoChevronForward  size={20} />
         </button>
     )
 }
@@ -23,8 +23,8 @@ const ArrowNext = (props)=>{
 const ArrowPrev = (props)=>{
     const {onClick} = props;
     return(
-        <button onClick={onClick} type='button' className='w-14 h-14 flex justify-center items-center rounded-full absolute z-10 top-1/2 -translate-y-1/2 bg-amber-700 text-white left-10'>
-            <IoChevronBackOutline  size={25} />
+        <button onClick={onClick} type='button' className='w-8 h-8 sm:w-14 sm:h-14 flex justify-center items-center rounded-full absolute z-10 top-1/2 -translate-y-1/2 bg-amber-700 text-white left-2 sm:left-10'>
+            <IoChevronBackOutline  size={20} />
         </button>
     )
 }

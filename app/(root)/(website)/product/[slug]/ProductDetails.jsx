@@ -12,6 +12,8 @@ import { WEBSITE_CART, WEBSITE_PRODUCT_DETAILS, WEBSITE_SHOP } from "@/routes/We
 import Link from "next/link";
 import Image from "next/image";
 import imgPlaceholder from "@/public/assets/images/img-placeholder.webp";
+import { FaTruck, FaMapMarkerAlt } from "react-icons/fa";
+import { Input } from "@/components/ui/input";
 import { FaStar } from "react-icons/fa6";
 import { decode, encode } from "entities";
 import { HiMinus, HiPlus } from "react-icons/hi2";
@@ -31,6 +33,11 @@ const ProductDetails = ({ product, variant, colors, sizes, reviewCount }) => {
 
   const [activeThumb, setActiveThumb] = useState();
   const [qty, setQty] = useState(1);
+
+  const [pincode, setPincode] = useState('');
+  const [deliveryEstimate, setDeliveryEstimate] = useState(null);
+  const [isCheckingPincode, setIsCheckingPincode] = useState(false);
+  const [pincodeError, setPincodeError] = useState('');
 
   const [isAddedIntoCart, setIsAddedIntoCart] = useState(false);
   const [isProductLoading, setIsProductLoading] = useState(false);
@@ -66,6 +73,44 @@ const ProductDetails = ({ product, variant, colors, sizes, reviewCount }) => {
         }
     }
   }
+
+  const handleCheckPincode = () => {
+    if (!/^\d{6}$/.test(pincode)) {
+      setPincodeError('Please enter a valid 6-digit PIN code.');
+      setDeliveryEstimate(null);
+      return;
+    }
+
+    setPincodeError('');
+    setIsCheckingPincode(true);
+    setDeliveryEstimate(null);
+
+    // Mock an API call delay
+    setTimeout(() => {
+      setIsCheckingPincode(false);
+      
+      const today = new Date();
+      let minDays = 4;
+      let maxDays = 7;
+
+      // Simple mock logic based on the first digit to simulate regional delivery speeds
+      if (pincode.startsWith('1') || pincode.startsWith('2') || pincode.startsWith('4')) {
+        minDays = 2;
+        maxDays = 4;
+      }
+
+      const minDate = new Date(today);
+      minDate.setDate(today.getDate() + minDays);
+      
+      const maxDate = new Date(today);
+      maxDate.setDate(today.getDate() + maxDays);
+
+      const options = { day: 'numeric', month: 'short' };
+      const estimateText = `Delivery between ${minDate.toLocaleDateString('en-IN', options)} and ${maxDate.toLocaleDateString('en-IN', options)}`;
+      
+      setDeliveryEstimate(estimateText);
+    }, 800);
+  };
 
   const handleAddToCart = ()=>{
     const cartProduct = {
@@ -196,7 +241,7 @@ const ProductDetails = ({ product, variant, colors, sizes, reviewCount }) => {
               {colors.map((color) => (
                 <Link onClick={()=>setIsProductLoading(true)} href={`${WEBSITE_PRODUCT_DETAILS(product.slug)}?color=${color}&size=${variant.size}`}
                     key={color}
-                    className={`border py-1 px-3 rounded-lg cursor-pointer hover:bg-gray-700 hover:text-white ${color === variant.color ? 'bg-gray-900 text-white' : ''}`}
+                    className={`border py-1 px-3 rounded-lg cursor-pointer hover:bg-gray-700 hover:text-white ${color === variant.color ? 'bg-gray-900 text-white' : ''} ${isProductLoading ? 'pointer-events-none opacity-50' : ''}`}
                 >{color}</Link>
               ))}
             </div>
@@ -210,7 +255,7 @@ const ProductDetails = ({ product, variant, colors, sizes, reviewCount }) => {
               {sizes.map((size) => (
                 <Link onClick={()=>setIsProductLoading(true)} href={`${WEBSITE_PRODUCT_DETAILS(product.slug)}?color=${variant.color}&size=${size}`}
                     key={size}
-                    className={`border py-1 px-3 rounded-lg cursor-pointer hover:bg-gray-700 hover:text-white ${size === variant.size ? 'bg-gray-900 text-white' : ''}`}
+                    className={`border py-1 px-3 rounded-lg cursor-pointer hover:bg-gray-700 hover:text-white ${size === variant.size ? 'bg-gray-900 text-white' : ''} ${isProductLoading ? 'pointer-events-none opacity-50' : ''}`}
                 >{size}</Link>
               ))}
             </div>
@@ -232,7 +277,44 @@ const ProductDetails = ({ product, variant, colors, sizes, reviewCount }) => {
 
           </div>
 
-          <div className="mt-5  items-center gap-5">
+          <div className="mt-6 border-t border-b py-5 border-gray-200 dark:border-gray-800">
+            <p className="font-bold mb-3 text-gray-800 dark:text-gray-200 flex items-center gap-2">
+              <FaTruck className="text-amber-700 dark:text-amber-500" />
+              Check Delivery & Availability
+            </p>
+            <div className="flex gap-3 mt-2">
+              <div className="relative flex-grow">
+                 <FaMapMarkerAlt className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                 <Input 
+                   type="text" 
+                   maxLength={6} 
+                   placeholder="Enter your 6-digit PIN code" 
+                   value={pincode}
+                   onChange={(e) => setPincode(e.target.value.replace(/\D/g, ''))}
+                   className="pl-10 rounded-xl"
+                 />
+              </div>
+              <Button 
+                onClick={handleCheckPincode} 
+                disabled={isCheckingPincode || pincode.length !== 6}
+                className="rounded-xl bg-gray-900 hover:bg-gray-800 dark:bg-gray-100 dark:hover:bg-white text-white dark:text-black font-semibold px-6 transition-all duration-300"
+              >
+                {isCheckingPincode ? 'Checking...' : 'Check'}
+              </Button>
+            </div>
+            
+            {pincodeError && <p className="text-red-500 text-sm mt-2 font-medium">{pincodeError}</p>}
+            
+            {deliveryEstimate && (
+              <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/50 rounded-xl flex items-start gap-2 animate-in fade-in duration-300">
+                <span className="text-green-700 dark:text-green-400 font-medium text-sm">
+                  ✓ {deliveryEstimate}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-6  items-center gap-5">
             {/* <ButtonLoading type="button" text="Buy Now" className="w-full rounded-full py-6 px-6 text-md bg-gray-900 hover:bg-gray-700 cursor-pointer" /> */}
 
             {!isAddedIntoCart ? 

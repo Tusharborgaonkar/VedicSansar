@@ -7,10 +7,10 @@ import banner2 from "@/public/assets/images/hero_section2.jpg"
 import FeaturedProduct from '@/components/Website/FeaturedProduct'
 import footerBanner from '@/public/assets/images/footersection1.jpg'
 import Testimonial from '@/components/Website/Testimonial'
-import { GiReturnArrow } from "react-icons/gi";
+import { MdOutlinePayment } from "react-icons/md";
 import { FaShippingFast } from "react-icons/fa";
 import { BiSupport } from "react-icons/bi";
-import { BiSolidDiscount } from "react-icons/bi";
+import { MdOutlineLocalShipping } from "react-icons/md";
 
 const Home = () => {
   return (
@@ -21,30 +21,30 @@ const Home = () => {
       </section>  
 
       {/* Banner section */}
-      <section className='lg:px-32 px-4 sm:pt-20 pt-5 pb-10'>
+      <section className='lg:px-32 px-4 pt-5 sm:pt-20 pb-10'>
 
-        <div className='grid grid-cols-2 sm:gap-10 gap-2'>
+        <div className='grid grid-cols-2 gap-2 sm:gap-6'>
 
-          <div className='border rounded-lg overflow-hidden'>
+          <div className='border rounded-lg overflow-hidden aspect-[4/3]'>
             <Link href="" >
               <Image 
                 src={banner1.src}
                 width={banner1.width}
                 height={banner1.height}
                 alt='banner 1'
-                className='transition-all hover:scale-110'
+                className='w-full h-full object-cover transition-all hover:scale-110'
               />
             </Link>
           </div>
 
-          <div className='border rounded-lg overflow-hidden'>
+          <div className='border rounded-lg overflow-hidden aspect-[4/3]'>
             <Link href="" >
               <Image 
                 src={banner2.src}
                 width={banner2.width}
                 height={banner2.height}
                 alt='banner 2'
-                className='transition-all hover:scale-110'
+                className='w-full h-full object-cover transition-all hover:scale-110'
               />
             </Link>
           </div>
@@ -75,10 +75,10 @@ const Home = () => {
         <div className='grid lg:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-10'>
           <div className='text-center'>
             <p className='flex justify-center items-center mb-3'>
-                <GiReturnArrow  size={40}/>
+                <MdOutlinePayment size={40}/>
             </p>
-            <h3 className='text-xl font-semibold'>7-Days Return.</h3>
-            <p>Risk free shopping with easy returns.</p>
+            <h3 className='text-xl font-semibold'>COD Available.</h3>
+            <p>Pay cash on delivery, no prepayment needed.</p>
 
           </div>
           <div className='text-center'>
@@ -99,10 +99,10 @@ const Home = () => {
           </div>
           <div className='text-center'>
             <p className='flex justify-center items-center mb-3'>
-                <BiSolidDiscount  size={40}/>
+                <MdOutlineLocalShipping size={40}/>
             </p>
-            <h3 className='text-xl font-semibold'>Member Discounts.</h3>
-            <p>Special offer for our loyal customers.</p>
+            <h3 className='text-xl font-semibold'>Fast Delivery.</h3>
+            <p>Within 4 to 6 working days.</p>
 
           </div>
           

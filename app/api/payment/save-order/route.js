@@ -32,11 +32,11 @@ export async function POST(request){
             landmark:true,
             ordernote:true,
         }).extend({
-           
+            paymentMethod: z.enum(['online', 'cod']),
             userId: z.string().optional(),
-            razorpay_payment_id: z.string().min(3, 'Payment id is required.'),
-            razorpay_order_id: z.string().min(3, 'Order id is required.'),
-            razorpay_signature: z.string().min(3, 'Signature is required.'),
+            razorpay_payment_id: z.string().optional(),
+            razorpay_order_id: z.string().optional(),
+            razorpay_signature: z.string().optional(),
             subtotal: z.number().nonnegative(),
             discount: z.number().nonnegative(),
             couponDiscountAmount: z.number().nonnegative(),
@@ -55,16 +55,29 @@ export async function POST(request){
         const validatedData = validate.data
 
         // payment verification
-
-        const verification = validatePaymentVerification({
-            order_id: validatedData.razorpay_order_id,
-            payment_id: validatedData.razorpay_payment_id
-        }, validatedData.razorpay_signature, process.env.RAZORPAY_KEY_SECRET)
-
         let paymentVerification = false;
+        let finalOrderId = validatedData.razorpay_order_id;
+        let finalPaymentId = validatedData.razorpay_payment_id;
 
-        if(verification){
+        if (validatedData.paymentMethod === 'online') {
+            if (!validatedData.razorpay_payment_id || !validatedData.razorpay_order_id || !validatedData.razorpay_signature) {
+                return response(false, 400, 'Razorpay details are required for online payment.');
+            }
+            const verification = validatePaymentVerification({
+                order_id: validatedData.razorpay_order_id,
+                payment_id: validatedData.razorpay_payment_id
+            }, validatedData.razorpay_signature, process.env.RAZORPAY_KEY_SECRET)
+
+            if(verification){
+                paymentVerification = true;
+            } else {
+                return response(false, 400, 'Payment signature verification failed.');
+            }
+        } else {
+            // COD
             paymentVerification = true;
+            finalOrderId = `COD-${Date.now()}`;
+            finalPaymentId = `N/A`;
         }
 
         const newOrder = await OrderModel.create({
@@ -83,15 +96,16 @@ export async function POST(request){
             discount : validatedData.discount,
             couponDiscountAmount : validatedData.couponDiscountAmount,
             totalAmount : validatedData.totalAmount,
-            payment_id : validatedData.razorpay_payment_id,
-            order_id : validatedData.razorpay_order_id,
+            paymentMethod : validatedData.paymentMethod,
+            payment_id : finalPaymentId,
+            order_id : finalOrderId,
             status : paymentVerification ? 'pending' : 'unverified',
         });
 
         try {
             const mailData = {
-                order_id : validatedData.razorpay_order_id,
-                orderDetailsUrl : `${process.env.NEXT_PUBLIC_BASE_URL}/order-details/${validatedData.razorpay_order_id}`
+                order_id : finalOrderId,
+                orderDetailsUrl : `${process.env.NEXT_PUBLIC_BASE_URL}/order-details/${finalOrderId}`
             }
 
             await sendMail('Congratulations!Your Order has been placed successfully.', validatedData.email, orderNotification(mailData));
@@ -99,7 +113,7 @@ export async function POST(request){
             // return catchError(error)
         }
 
-        return response(true, 200 , 'Order placed Successfully!');
+        return response(true, 200 , 'Order placed Successfully!', { order_id: finalOrderId });
     } catch (error) {
         return catchError(error);
     }

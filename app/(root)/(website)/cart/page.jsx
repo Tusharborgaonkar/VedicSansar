@@ -1,5 +1,6 @@
 'use client'
 import { Button } from '@/components/ui/button';
+import TransitionLinkButton from '@/components/Application/TransitionLinkButton';
 import WebsiteBreadcrumb from '@/components/Website/WebsiteBreadcrumb';
 import { WEBSITE_CHECKOUT, WEBSITE_PRODUCT_DETAILS, WEBSITE_SHOP } from '@/routes/WebsiteRoute';
 import Image from 'next/image';
@@ -193,11 +194,9 @@ const CartPage = () => {
                       </tbody>
                     </table>
 
-                    <Button type="button" asChild className="w-full bg-black rounded-full mt-5 mb-3 hover:bg-white hover:text-black hover:border hover:border-black">
-                      <Link href={WEBSITE_CHECKOUT}>
-                        Proceed to Checkout
-                      </Link>
-                    </Button>
+                    <TransitionLinkButton href={WEBSITE_CHECKOUT} className="w-full bg-black rounded-full mt-5 mb-3 hover:bg-white hover:text-black hover:border hover:border-black">
+                      Proceed to Checkout
+                    </TransitionLinkButton>
 
                     <p className='text-center'>
                       <Link href={WEBSITE_SHOP} className='hover:underline'>Continue Shopping</Link>

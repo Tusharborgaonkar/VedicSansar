@@ -25,7 +25,7 @@ const MediaModal = ({open, setOpen , selectedMedia, setSelectedMedia, isMultiple
         initialPageParam: 0,
         getNextPageParam: (lastPage, allPages)=>{
             const nextPage = allPages.length
-            return lastPage.hasMore ? nextPage : undefined
+            return lastPage?.hasMore ? nextPage : undefined
         }
     })
     const handleClear = ()=>{

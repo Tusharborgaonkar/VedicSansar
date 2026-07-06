@@ -89,7 +89,7 @@ const ProductReview = ({productId}) => {
 
             if(!getReviewData.success)
             {
-                return;
+                throw new Error(getReviewData.message || "Failed to fetch reviews");
             }
 
             return getReviewData.data;
@@ -100,7 +100,7 @@ const ProductReview = ({productId}) => {
         queryFn: async ({pageParam}) => await fetchReview(pageParam),
         initialPageParam: 0,
         getNextPageParam: (lastPage)=>{
-            return lastPage.nextPage
+            return lastPage?.nextPage
         }
     })
 
